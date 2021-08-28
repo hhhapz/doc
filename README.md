@@ -10,7 +10,7 @@ s := doc.HTTPSearcher{
 	Parser: godoc.Parser
 	// Parser: pkgsite.Parser
 }
-pkg, err := s.Search("bytes")
+pkg, err := s.Search(context.TODO(), "bytes")
 
 // use pkg
 ```

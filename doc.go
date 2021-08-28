@@ -50,13 +50,6 @@ var _ Searcher = HTTPSearcher{}
 
 // Search searches godocs for the provided module.
 //
-// Search calls SearchContext with context.Background().
-func (h HTTPSearcher) Search(module string) (Package, error) {
-	return h.SearchContext(context.Background(), module)
-}
-
-// Search searches godocs for the provided module.
-//
 // SearchContext is the main workhorse for querying and parsing the http
 // response. The implementation for parsing the document can be found in
 // parse.go
@@ -65,7 +58,7 @@ func (h HTTPSearcher) Search(module string) (Package, error) {
 // returned. If the page could not be parsed by GoQuery, the error will be of
 // type Otherwise, issues while parsing the document will of type ParseError,
 // and will contain the selector being parsed, for more context.
-func (h HTTPSearcher) SearchContext(ctx context.Context, module string) (Package, error) {
+func (h HTTPSearcher) Search(ctx context.Context, module string) (Package, error) {
 	if h.Parser == nil {
 		return Package{}, ErrNoParser
 	}
