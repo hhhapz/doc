@@ -59,8 +59,6 @@ func (h HTTPSearcher) Search(module string) (Package, error) {
 // response. The implementation for parsing the document can be found in
 // parse.go
 //
-// Errors
-//
 // If the page does not respond with a 200 status code, a InvalidStatusError is
 // returned. If the page could not be parsed by GoQuery, the error will be of
 // type Otherwise, issues while parsing the document will of type ParseError,
