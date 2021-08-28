@@ -15,4 +15,4 @@ pkg, err := s.Search("bytes")
 ---
 
 This package relies on [https://godoc.io](https://godoc.io).
-It is planned to add a parser for [https://pkg.go.dev](pkgsite) as well.
+It is planned to add a parser for [pkgsite](https://pkg.go.dev) as well.
