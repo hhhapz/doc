@@ -21,7 +21,7 @@ type state struct {
 	current *Type
 }
 
-func NewState(doc *goquery.Document) *state {
+func newState(doc *goquery.Document) *state {
 	name := doc.Find("#pkg-overview").Text()
 	name = strings.TrimPrefix(name, "package ")
 

@@ -77,7 +77,7 @@ func (h HTTPSearcher) SearchContext(ctx context.Context, module string) (Package
 		return Package{}, err
 	}
 
-	s := NewState(doc)
+	s := newState(doc)
 
 	doc.Find(`[data-kind="function"], [data-kind="type"], [data-kind="method"]:not([class*="decl"])`).EachWithBreak(func(_ int, sel *goquery.Selection) bool {
 		kind := sel.AttrOr("data-kind", "")
