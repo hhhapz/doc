@@ -16,11 +16,7 @@ const (
 	DefaultUserAgent = "Doc (https://github.com/hhhapz/doc)"
 	// Selectors matches methods, types, and functions on the documentation
 	// page.
-	Selectors = `
-[data-kind="function"],
-[data-kind="type"],
-[data-kind="method"]:not([class*="decl"])
-`
+	Selectors = `[data-kind="function"], [data-kind="type"], [data-kind="method"]:not([class*="decl"])`
 )
 
 // InvalidStatusError indicates that the request to the godocs.io was not
@@ -77,7 +73,7 @@ func (h HTTPSearcher) SearchContext(ctx context.Context, module string) (Package
 
 	s := newState(doc)
 
-	doc.Find(`[data-kind="function"], [data-kind="type"], [data-kind="method"]:not([class*="decl"])`).EachWithBreak(func(_ int, sel *goquery.Selection) bool {
+	doc.Find(Selectors).EachWithBreak(func(_ int, sel *goquery.Selection) bool {
 		kind := sel.AttrOr("data-kind", "")
 		switch kind {
 		case "function":
