@@ -10,11 +10,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-const (
-	// DefaultuserAgent is the the default user agent when not provided.
-	DefaultUserAgent = "Doc (https://github.com/hhhapz/doc)"
-)
-
 // Parser is the interface that package site parsers implement.
 type Parser interface {
 	URL(module string) (full string)
@@ -32,21 +27,21 @@ func (err InvalidStatusError) Error() string {
 
 var ErrNoParser = errors.New("parser not provided")
 
-// HTTPSearcher provides an interface to search the godocs package module page.
+// httpSearcher provides an interface to search the godocs package module page.
 // It implements the Searcher interface. A parser must be provided, such as
 // pkgsite.Parser, or godoc.Parser.
 //
-// HTTPSearcher does not cache results and will do the request every time, even
+// httpSearcher does not cache results and will do the request every time, even
 // if provided the same module name. If caching is required, the CachedSearcher
 // type.
-type HTTPSearcher struct {
+type httpSearcher struct {
 	Parser Parser
 	Client *http.Client
 	Agent  string
 }
 
 // HTTPSearcher implements the Searcher interface.
-var _ Searcher = HTTPSearcher{}
+var _ Searcher = httpSearcher{}
 
 // Search searches godocs for the provided module.
 //
@@ -58,7 +53,7 @@ var _ Searcher = HTTPSearcher{}
 // returned. If the page could not be parsed by GoQuery, the error will be of
 // type Otherwise, issues while parsing the document will of type ParseError,
 // and will contain the selector being parsed, for more context.
-func (h HTTPSearcher) Search(ctx context.Context, module string) (Package, error) {
+func (h httpSearcher) Search(ctx context.Context, module string) (Package, error) {
 	if h.Parser == nil {
 		return Package{}, ErrNoParser
 	}
@@ -76,22 +71,20 @@ func (h HTTPSearcher) Search(ctx context.Context, module string) (Package, error
 	return h.Parser.Parse(document)
 }
 
+func (h *httpSearcher) SetAgent(agent string) {
+	h.Agent = agent
+}
+
 // request is a helper function to do the http request and return the body.
-func (h HTTPSearcher) request(ctx context.Context, module string) (io.ReadCloser, error) {
+func (h httpSearcher) request(ctx context.Context, module string) (io.ReadCloser, error) {
 	url := h.Parser.URL(module)
 	r, err := http.NewRequestWithContext(ctx, "GET", url, http.NoBody)
 	if err != nil {
 		return nil, err
 	}
 
-	if h.Agent == "" {
-		h.Agent = DefaultUserAgent
-	}
 	r.Header.Add("User-Agent", h.Agent)
 
-	if h.Client == nil {
-		h.Client = http.DefaultClient
-	}
 	resp, err := h.Client.Do(r)
 	if err != nil {
 		return nil, err

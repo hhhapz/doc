@@ -6,10 +6,7 @@ modules.
 To import and use, `go get github.com/hhhapz/doc`
 
 ```go
-s := doc.HTTPSearcher{
-	Parser: godoc.Parser
-	// Parser: pkgsite.Parser
-}
+s := doc.New(http.DefaultClient, godocs.Parser) // or pkgsite.Parser
 pkg, err := s.Search(context.TODO(), "bytes")
 
 // use pkg

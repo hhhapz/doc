@@ -1,4 +1,4 @@
-package godoc
+package godocs
 
 import (
 	"github.com/PuerkitoBio/goquery"
