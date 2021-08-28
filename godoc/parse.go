@@ -1,9 +1,10 @@
-package doc
+package godoc
 
 import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/hhhapz/doc"
 )
 
 type ParseError struct {
@@ -17,15 +18,15 @@ func (err ParseError) Error() string {
 
 type state struct {
 	doc     *goquery.Document
-	pkg     Package
-	current *Type
+	pkg     doc.Package
+	current *doc.Type
 }
 
-func newState(doc *goquery.Document) *state {
-	name := doc.Find("#pkg-overview").Text()
+func newState(document *goquery.Document) *state {
+	name := document.Find("#pkg-overview").Text()
 	name = strings.TrimPrefix(name, "package ")
 
-	sel := doc.Find("#pkg-overview").NextUntil("#pkg-index")
+	sel := document.Find("#pkg-overview").NextUntil("#pkg-index")
 	// ignore first import "pkgname" p tag
 	overview := comments(sel)
 	examples := examples(sel)
@@ -33,14 +34,14 @@ func newState(doc *goquery.Document) *state {
 	url = url[8 : len(url)-1]
 
 	return &state{
-		doc: doc,
-		pkg: Package{
+		doc: document,
+		pkg: doc.Package{
 			URL:       url,
 			Name:      name,
 			Overview:  overview[1:],
 			Examples:  examples,
-			Functions: map[string]Function{},
-			Types:     map[string]Type{},
+			Functions: map[string]doc.Function{},
+			Types:     map[string]doc.Type{},
 		},
 	}
 }
@@ -58,7 +59,7 @@ func (s *state) function(sel *goquery.Selection) error {
 	}
 	signature := next.First().Text()
 
-	f := Function{
+	f := doc.Function{
 		Name:      name,
 		Signature: signature,
 		Comment:   comments(next),
@@ -84,13 +85,13 @@ func (s *state) typ(sel *goquery.Selection) error {
 	}
 	signature := next.First().Text()
 
-	t := Type{
+	t := doc.Type{
 		Name:          name,
 		Signature:     signature,
 		Comment:       comments(next),
 		Examples:      examples(next),
-		TypeFunctions: map[string]Function{},
-		Methods:       map[string]Method{},
+		TypeFunctions: map[string]doc.Function{},
+		Methods:       map[string]doc.Method{},
 	}
 
 	s.current = &t
@@ -112,9 +113,9 @@ func (s *state) method(sel *goquery.Selection) error {
 
 	signature := next.First().Text()
 
-	m := Method{
+	m := doc.Method{
 		For: split[0],
-		Function: Function{
+		Function: doc.Function{
 			Name:      name,
 			Signature: signature,
 			Comment:   comments(next),
@@ -125,9 +126,9 @@ func (s *state) method(sel *goquery.Selection) error {
 	return nil
 }
 
-func comments(sel *goquery.Selection) Comment {
+func comments(sel *goquery.Selection) doc.Comment {
 	nodes := sel.Filter("p, pre").Nodes
-	comments := make(Comment, 0, len(nodes))
+	comments := make(doc.Comment, 0, len(nodes))
 
 	for _, node := range nodes {
 		text := node.FirstChild.Data
@@ -135,17 +136,17 @@ func comments(sel *goquery.Selection) Comment {
 		case "p":
 			f := strings.Fields(text)
 			text = strings.Join(f, " ")
-			comments = append(comments, Paragraph(text))
+			comments = append(comments, doc.Paragraph(text))
 		case "pre":
-			comments = append(comments, Pre(text))
+			comments = append(comments, doc.Pre(text))
 		}
 	}
 	return comments
 }
 
-func examples(sel *goquery.Selection) []Example {
+func examples(sel *goquery.Selection) []doc.Example {
 	sel = sel.Find(".panel")
-	examples := make([]Example, 0, len(sel.Nodes))
+	examples := make([]doc.Example, 0, len(sel.Nodes))
 	sel.Each(func(_ int, s *goquery.Selection) {
 		// typically "Example¶"
 		name := s.Find("summary").Text()
@@ -156,7 +157,7 @@ func examples(sel *goquery.Selection) []Example {
 			output = ""
 		}
 
-		examples = append(examples, Example{
+		examples = append(examples, doc.Example{
 			Name:   strings.TrimSuffix(name, "¶"),
 			Code:   code,
 			Output: output,

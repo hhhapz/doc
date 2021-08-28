@@ -2,6 +2,7 @@ package doc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,14 +11,15 @@ import (
 )
 
 const (
-	// Base is the base path to godocs.io
-	Base = "https://godocs.io/"
 	// DefaultuserAgent is the the default user agent when not provided.
 	DefaultUserAgent = "Doc (https://github.com/hhhapz/doc)"
-	// Selectors matches methods, types, and functions on the documentation
-	// page.
-	Selectors = `[data-kind="function"], [data-kind="type"], [data-kind="method"]:not([class*="decl"])`
 )
+
+// Parser is the interface that package site parsers implement.
+type Parser interface {
+	URL(module string) (full string)
+	Parse(document *goquery.Document) (Package, error)
+}
 
 // InvalidStatusError indicates that the request to the godocs.io was not
 // successful. The value is the status that was returned from the page instead.
@@ -28,13 +30,17 @@ func (err InvalidStatusError) Error() string {
 	return fmt.Sprintf("invalid response status: %d", err)
 }
 
+var ErrNoParser = errors.New("parser not provided")
+
 // HTTPSearcher provides an interface to search the godocs package module page.
-// It implements the Searcher interface. The zero value is ready to use.
+// It implements the Searcher interface. A parser must be provided, such as
+// pkgsite.Parser, or godoc.Parser.
 //
 // HTTPSearcher does not cache results and will do the request every time, even
 // if provided the same module name. If caching is required, the CachedSearcher
 // type.
 type HTTPSearcher struct {
+	Parser Parser
 	Client *http.Client
 	Agent  string
 }
@@ -60,45 +66,27 @@ func (h HTTPSearcher) Search(module string) (Package, error) {
 // type Otherwise, issues while parsing the document will of type ParseError,
 // and will contain the selector being parsed, for more context.
 func (h HTTPSearcher) SearchContext(ctx context.Context, module string) (Package, error) {
+	if h.Parser == nil {
+		return Package{}, ErrNoParser
+	}
+
 	body, err := h.request(ctx, module)
 	if err != nil {
 		return Package{}, err
 	}
+	defer body.Close()
 
-	doc, err := goquery.NewDocumentFromReader(body)
-	_ = body.Close()
+	document, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
 		return Package{}, err
 	}
-
-	s := newState(doc)
-
-	doc.Find(Selectors).EachWithBreak(func(_ int, sel *goquery.Selection) bool {
-		kind := sel.AttrOr("data-kind", "")
-		switch kind {
-		case "function":
-			err = s.function(sel)
-		case "type":
-			err = s.typ(sel)
-		case "method":
-			err = s.method(sel)
-		default:
-			// this should never happen
-		}
-		// true when err is nil
-		return err == nil
-	})
-	s.pkg.Types[s.current.Name] = *s.current
-
-	if err != nil {
-		return Package{}, err
-	}
-	return s.pkg, nil
+	return h.Parser.Parse(document)
 }
 
 // request is a helper function to do the http request and return the body.
 func (h HTTPSearcher) request(ctx context.Context, module string) (io.ReadCloser, error) {
-	r, err := http.NewRequestWithContext(ctx, "GET", Base+module, http.NoBody)
+	url := h.Parser.URL(module)
+	r, err := http.NewRequestWithContext(ctx, "GET", url, http.NoBody)
 	if err != nil {
 		return nil, err
 	}
