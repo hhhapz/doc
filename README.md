@@ -1,7 +1,8 @@
 # doc
 
 [![version][goversion]][go-dev]
-[![version][pkgbadge]][pkglink]
+[![reference][pkgbadge]][pkglink]
+[![tag][tagbadge]][pkglink]
 
 This module provides an API to programatically search the documentation of Go
 modules.
@@ -41,7 +42,8 @@ It is planned to add a parser for [pkgsite][pkgsite] as well.
 [godocs]: https://godocs.io
 [go-dev]: https://go.dev
 [pkgsite]: https://pkg.go.dev
-[pkglink]: https://pkg.go.dev/badge/github.com/hhhapz/doc.svg
+[pkglink]: https://pkg.go.dev/github.com/hhhapz/doc
 <!-- -->
 [goversion]: https://img.shields.io/github/go-mod/go-version/hhhapz/doc?color=%23007D9C&label=Go&style=flat
+[tagbadge]: https://img.shields.io/github/v/tag/hhhapz/doc?color=%23007d9c
 [pkgbadge]: https://pkg.go.dev/badge/github.com/hhhapz/doc.svg
