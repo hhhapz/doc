@@ -27,8 +27,12 @@ func (godocParser) URL(module string) string {
 }
 
 func (p godocParser) Parse(document *goquery.Document) (doc.Package, error) {
-	s := newState(document)
+	// special case not found case for godocs
+	if document.Find("head title").Text() == "Not Found - godocs.io" {
+		return doc.Package{}, doc.InvalidStatusError(404)
+	}
 
+	s := newState(document)
 	var err error
 	document.Find(selectors).EachWithBreak(func(_ int, sel *goquery.Selection) bool {
 		kind := sel.AttrOr("data-kind", "")
