@@ -46,7 +46,7 @@ func newState(document *goquery.Document) *state {
 	}
 }
 
-func (s *state) NewError(sel *goquery.Selection, msg string) error {
+func (s *state) newError(sel *goquery.Selection, msg string) error {
 	return ParseError{sel, msg}
 }
 
@@ -55,7 +55,7 @@ func (s *state) function(sel *goquery.Selection) error {
 
 	name, ok := sel.Attr("id")
 	if !ok {
-		return s.NewError(sel, "could not get id")
+		return s.newError(sel, "could not get id")
 	}
 	signature := next.First().Text()
 
@@ -81,7 +81,7 @@ func (s *state) typ(sel *goquery.Selection) error {
 
 	name, ok := sel.Attr("id")
 	if !ok {
-		return s.NewError(sel, "could not get id")
+		return s.newError(sel, "could not get id")
 	}
 	signature := next.First().Text()
 
@@ -100,13 +100,13 @@ func (s *state) typ(sel *goquery.Selection) error {
 
 func (s *state) method(sel *goquery.Selection) error {
 	if s.current == nil {
-		return s.NewError(sel, "could not get method type")
+		return s.newError(sel, "could not get method type")
 	}
 
 	next := sel.NextUntil("h3, h4")
 	name, ok := sel.Attr("id")
 	if !ok {
-		return s.NewError(sel, "could not get id")
+		return s.newError(sel, "could not get id")
 	}
 	split := strings.SplitN(name, ".", 2)
 	name = split[len(split)-1]

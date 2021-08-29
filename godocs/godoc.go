@@ -6,31 +6,31 @@ import (
 )
 
 const (
-	// Base is the base path to godocs.io
-	Base = "https://godocs.io/"
-	// Selectors matches methods, types, and functions on the documentation
+	// base is the base path to godocs.io
+	base = "https://godocs.io/"
+	// selectors matches methods, types, and functions on the documentation
 	// page.
-	Selectors = `[data-kind="function"], [data-kind="type"], [data-kind="method"]:not([class*="decl"])`
+	selectors = `[data-kind="function"], [data-kind="type"], [data-kind="method"]:not([class*="decl"])`
 )
 
-// GodocParser implements doc.Parser.
-type GodocParser struct{}
+// godocParser implements doc.Parser.
+type godocParser struct{}
 
 // Parser is an implementation of godoc.Parser that retrieves documentation
 // from https://godocs.io.
-var Parser doc.Parser = GodocParser{}
+var Parser doc.Parser = godocParser{}
 
 // URL returns a url to the path to see the documentation for the provided
 // module on https://godocs.io/.
-func (GodocParser) URL(module string) string {
-	return Base + module
+func (godocParser) URL(module string) string {
+	return base + module
 }
 
-func (p GodocParser) Parse(document *goquery.Document) (doc.Package, error) {
+func (p godocParser) Parse(document *goquery.Document) (doc.Package, error) {
 	s := newState(document)
 
 	var err error
-	document.Find(Selectors).EachWithBreak(func(_ int, sel *goquery.Selection) bool {
+	document.Find(selectors).EachWithBreak(func(_ int, sel *goquery.Selection) bool {
 		kind := sel.AttrOr("data-kind", "")
 		switch kind {
 		case "function":
