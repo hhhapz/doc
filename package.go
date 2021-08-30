@@ -57,7 +57,7 @@ func (c Comment) Text() string {
 	for _, n := range c {
 		s = append(s, n.Text())
 	}
-	return strings.Join(s, "\n")
+	return strings.Join(s, "\n\n")
 }
 
 func (c Comment) HTML() string {
@@ -73,7 +73,7 @@ func (c Comment) Markdown() string {
 	for _, n := range c {
 		s = append(s, n.Markdown())
 	}
-	return strings.Join(s, "\n")
+	return strings.Join(s, "\n\n")
 }
 
 type Paragraph string
