@@ -33,6 +33,7 @@ func (p godocParser) Parse(document *goquery.Document) (doc.Package, error) {
 	}
 
 	s := newState(document)
+
 	var err error
 	document.Find(selectors).EachWithBreak(func(_ int, sel *goquery.Selection) bool {
 		kind := sel.AttrOr("data-kind", "")

@@ -5,6 +5,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/hhhapz/doc"
+	"golang.org/x/net/html"
 )
 
 type ParseError struct {
@@ -134,9 +135,19 @@ func comments(sel *goquery.Selection) doc.Comment {
 		text := node.FirstChild.Data
 		switch node.Data {
 		case "p":
+			var text string
+
+			for child := node.FirstChild; child != nil; child = child.NextSibling {
+				switch child.Type {
+				case html.TextNode:
+					text += child.Data
+				case html.ElementNode:
+					text += child.FirstChild.Data
+				}
+			}
+
 			f := strings.Fields(text)
-			text = strings.Join(f, " ")
-			comments = append(comments, doc.Paragraph(text))
+			comments = append(comments, doc.Paragraph(strings.Join(f, " ")))
 		case "pre":
 			comments = append(comments, doc.Pre(text))
 		}
