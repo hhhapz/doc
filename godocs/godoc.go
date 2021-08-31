@@ -1,6 +1,8 @@
 package godocs
 
 import (
+	"strings"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/hhhapz/doc"
 )
@@ -26,13 +28,13 @@ func (godocParser) URL(module string) string {
 	return base + module
 }
 
-func (p godocParser) Parse(document *goquery.Document) (doc.Package, error) {
+func (p godocParser) Parse(document *goquery.Document, useCase bool) (doc.Package, error) {
 	// special case not found case for godocs
 	if document.Find("head title").Text() == "Not Found - godocs.io" {
 		return doc.Package{}, doc.InvalidStatusError(404)
 	}
 
-	s := newState(document)
+	s := newState(document, useCase)
 
 	var err error
 	document.Find(selectors).EachWithBreak(func(_ int, sel *goquery.Selection) bool {
@@ -50,7 +52,12 @@ func (p godocParser) Parse(document *goquery.Document) (doc.Package, error) {
 		// true when err is nil
 		return err == nil
 	})
-	s.pkg.Types[s.current.Name] = *s.current
+
+	name := s.current.Name
+	if !s.useCase {
+		name = strings.ToLower(name)
+	}
+	s.pkg.Types[name] = *s.current
 
 	if err != nil {
 		return doc.Package{}, err

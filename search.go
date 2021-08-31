@@ -13,6 +13,7 @@ type Searcher interface {
 
 type configurer interface {
 	withAgent(string)
+	maintainCase()
 }
 
 func UserAgent(agent string) func(configurer) {
@@ -21,11 +22,18 @@ func UserAgent(agent string) func(configurer) {
 	}
 }
 
+func MaintainCase() func(configurer) {
+	return func(c configurer) {
+		c.maintainCase()
+	}
+}
+
 func New(client *http.Client, parser Parser, opts ...func(configurer)) *HTTPSearcher {
 	s := &HTTPSearcher{
-		client: client,
-		parser: parser,
-		agent:  "Doc (https://github.com/hhhapz/doc)",
+		client:   client,
+		parser:   parser,
+		agent:    "Doc (https://github.com/hhhapz/doc)",
+		withCase: false,
 	}
 	for _, opt := range opts {
 		opt(s)

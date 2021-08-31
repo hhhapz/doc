@@ -12,7 +12,7 @@ import (
 // Parser is the interface that package site parsers implement.
 type Parser interface {
 	URL(module string) (full string)
-	Parse(document *goquery.Document) (Package, error)
+	Parse(document *goquery.Document, useCase bool) (Package, error)
 }
 
 // InvalidStatusError indicates that the request to the godocs.io was not
@@ -34,7 +34,9 @@ func (err InvalidStatusError) Error() string {
 type HTTPSearcher struct {
 	parser Parser
 	client *http.Client
-	agent  string
+
+	agent    string
+	withCase bool
 }
 
 // httpSearcher implements the Searcher interface.
@@ -61,11 +63,15 @@ func (h HTTPSearcher) Search(ctx context.Context, module string) (Package, error
 	if err != nil {
 		return Package{}, err
 	}
-	return h.parser.Parse(document)
+	return h.parser.Parse(document, h.withCase)
 }
 
 func (h *HTTPSearcher) withAgent(agent string) {
 	h.agent = agent
+}
+
+func (h *HTTPSearcher) maintainCase() {
+	h.withCase = true
 }
 
 // request is a helper function to do the http request and return the body.

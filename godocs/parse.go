@@ -21,9 +21,10 @@ type state struct {
 	doc     *goquery.Document
 	pkg     doc.Package
 	current *doc.Type
+	useCase bool
 }
 
-func newState(document *goquery.Document) *state {
+func newState(document *goquery.Document, useCase bool) *state {
 	name := document.Find("#pkg-overview").Text()
 	name = strings.TrimPrefix(name, "package ")
 
@@ -44,6 +45,7 @@ func newState(document *goquery.Document) *state {
 			Functions: map[string]doc.Function{},
 			Types:     map[string]doc.Type{},
 		},
+		useCase: useCase,
 	}
 }
 
@@ -67,6 +69,10 @@ func (s *state) function(sel *goquery.Selection) error {
 		Examples:  examples(next),
 	}
 
+	if !s.useCase {
+		name = strings.ToLower(name)
+	}
+
 	s.pkg.Functions[name] = f
 	if s.current != nil {
 		s.current.TypeFunctions[name] = f
@@ -76,10 +82,14 @@ func (s *state) function(sel *goquery.Selection) error {
 
 func (s *state) typ(sel *goquery.Selection) error {
 	if s.current != nil {
-		s.pkg.Types[s.current.Name] = *s.current
+		name := s.current.Name
+		if !s.useCase {
+			name = strings.ToLower(name)
+		}
+		s.pkg.Types[name] = *s.current
 	}
-	next := sel.NextUntil("h3, h4")
 
+	next := sel.NextUntil("h3, h4")
 	name, ok := sel.Attr("id")
 	if !ok {
 		return s.newError(sel, "could not get id")
@@ -123,6 +133,11 @@ func (s *state) method(sel *goquery.Selection) error {
 			Examples:  examples(next),
 		},
 	}
+
+	if !s.useCase {
+		name = strings.ToLower(name)
+	}
+
 	s.current.Methods[name] = m
 	return nil
 }

@@ -12,11 +12,34 @@ modules.
 To import and use, `go get github.com/hhhapz/doc`
 
 ```go
-s := doc.New(http.DefaultClient, godocs.Parser) // or pkgsite.Parser
+s := doc.New(http.DefaultClient, godocs.Parser, opts...) // or pkgsite.Parser
 pkg, err := s.Search(context.TODO(), "bytes")
 
 // use pkg
 ```
+
+### Options (opts...)
+
+Currently there are two available options:
+
+#### `doc.MaintainCase()`
+
+By default, the maps in the Package struct will have lower case keys:
+
+- `Package.Functions`
+- `Package.Types`
+- `Package.Types.TypeFunctions`
+- `Package.Types.Methods`
+
+When enabling MaintainCase, the keys to all of these functions will be retained
+to their true case.
+
+#### `doc.UserAgent(string)`
+
+UserAgent will allow you to change the UA agent for all requests to the package
+sites. by default it will link to this repository.
+
+---
 
 ### Caching packages
 
