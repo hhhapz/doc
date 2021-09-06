@@ -64,7 +64,7 @@ func (s *state) function(sel *goquery.Selection) error {
 
 	f := doc.Function{
 		Name:      name,
-		Signature: signature,
+		Signature: strings.TrimPrefix(signature, "❖"),
 		Comment:   comments(next),
 		Examples:  examples(next),
 	}
@@ -98,7 +98,7 @@ func (s *state) typ(sel *goquery.Selection) error {
 
 	t := doc.Type{
 		Name:          name,
-		Signature:     signature,
+		Signature:     strings.TrimPrefix(signature, "❖"),
 		Comment:       comments(next),
 		Examples:      examples(next),
 		TypeFunctions: map[string]doc.Function{},
@@ -128,7 +128,7 @@ func (s *state) method(sel *goquery.Selection) error {
 		For: split[0],
 		Function: doc.Function{
 			Name:      name,
-			Signature: signature,
+			Signature: strings.TrimPrefix(signature, "❖"),
 			Comment:   comments(next),
 			Examples:  examples(next),
 		},
