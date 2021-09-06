@@ -76,6 +76,20 @@ func (c Comment) Markdown() string {
 	return strings.Join(s, "\n\n")
 }
 
+type Heading string
+
+func (h Heading) Text() string {
+	return string(h)
+}
+
+func (h Heading) HTML() string {
+	return "<h4>" + html.EscapeString(string(h)) + "</h4>"
+}
+
+func (h Heading) Markdown() string {
+	return string("**" + h + "**")
+}
+
 type Paragraph string
 
 func (p Paragraph) Text() string {

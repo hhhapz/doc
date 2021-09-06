@@ -54,7 +54,7 @@ func (s *state) newError(sel *goquery.Selection, msg string) error {
 }
 
 func (s *state) function(sel *goquery.Selection) error {
-	next := sel.NextUntil("h3, h4")
+	next := sel.NextUntil(selectors)
 
 	name, ok := sel.Attr("id")
 	if !ok {
@@ -89,7 +89,7 @@ func (s *state) typ(sel *goquery.Selection) error {
 		s.pkg.Types[name] = *s.current
 	}
 
-	next := sel.NextUntil("h3, h4")
+	next := sel.NextUntil(selectors)
 	name, ok := sel.Attr("id")
 	if !ok {
 		return s.newError(sel, "could not get id")
@@ -114,7 +114,7 @@ func (s *state) method(sel *goquery.Selection) error {
 		return s.newError(sel, "could not get method type")
 	}
 
-	next := sel.NextUntil("h3, h4")
+	next := sel.NextUntil(selectors)
 	name, ok := sel.Attr("id")
 	if !ok {
 		return s.newError(sel, "could not get id")
@@ -143,7 +143,7 @@ func (s *state) method(sel *goquery.Selection) error {
 }
 
 func comments(sel *goquery.Selection) doc.Comment {
-	nodes := sel.Filter("p, pre").Nodes
+	nodes := sel.Filter("p, pre, h4").Nodes
 	comments := make(doc.Comment, 0, len(nodes))
 
 	for _, node := range nodes {
@@ -165,6 +165,18 @@ func comments(sel *goquery.Selection) doc.Comment {
 			comments = append(comments, doc.Paragraph(strings.Join(f, " ")))
 		case "pre":
 			comments = append(comments, doc.Pre(text))
+		case "h4":
+			var ok bool
+			for _, attr := range node.Attr {
+				if attr.Key == "id" && strings.HasPrefix(attr.Val, "hdr-") {
+					ok = true
+				}
+			}
+			if !ok {
+				continue
+			}
+			text = strings.TrimSpace(text)
+			comments = append(comments, doc.Heading(text))
 		}
 	}
 	return comments

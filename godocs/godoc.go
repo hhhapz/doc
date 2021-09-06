@@ -53,11 +53,13 @@ func (p godocParser) Parse(document *goquery.Document, useCase bool) (doc.Packag
 		return err == nil
 	})
 
-	name := s.current.Name
-	if !s.useCase {
-		name = strings.ToLower(name)
+	if s.current != nil {
+		name := s.current.Name
+		if !s.useCase {
+			name = strings.ToLower(name)
+		}
+		s.pkg.Types[name] = *s.current
 	}
-	s.pkg.Types[name] = *s.current
 
 	if err != nil {
 		return doc.Package{}, err
