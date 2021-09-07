@@ -24,7 +24,7 @@ type state struct {
 	useCase bool
 }
 
-func newState(document *goquery.Document, useCase bool) *state {
+func newState(document *goquery.Document, useCase bool) (*state, error) {
 	name := document.Find("#pkg-overview").Text()
 	name = strings.TrimPrefix(name, "package ")
 
@@ -33,6 +33,9 @@ func newState(document *goquery.Document, useCase bool) *state {
 	overview := comments(sel)
 	examples := examples(sel)
 	url := sel.Find("code").First().Text()
+	if len(url) == 0 {
+		return nil, doc.InvalidStatusError(404)
+	}
 	url = url[8 : len(url)-1]
 
 	return &state{
@@ -46,7 +49,7 @@ func newState(document *goquery.Document, useCase bool) *state {
 			Types:     map[string]doc.Type{},
 		},
 		useCase: useCase,
-	}
+	}, nil
 }
 
 func (s *state) newError(sel *goquery.Selection, msg string) error {
