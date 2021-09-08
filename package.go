@@ -69,11 +69,22 @@ func (c Comment) HTML() string {
 }
 
 func (c Comment) Markdown() string {
-	var s []string
-	for _, n := range c {
-		s = append(s, n.Markdown())
+	if len(c) == 0 {
+		return ""
 	}
-	return strings.Join(s, "\n\n")
+	if len(c) == 1 {
+		return c[0].Markdown()
+	}
+
+	var s string
+	for _, n := range c {
+		if _, ok := n.(Pre); !ok {
+			s += "\n"
+		}
+		s += "\n" + n.Markdown()
+	}
+
+	return s[2:]
 }
 
 type Heading string
