@@ -5,7 +5,6 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/hhhapz/doc"
-	"golang.org/x/net/html"
 )
 
 type ParseError struct {
@@ -146,42 +145,32 @@ func (s *state) method(sel *goquery.Selection) error {
 }
 
 func comments(sel *goquery.Selection) doc.Comment {
-	nodes := sel.Filter("p, pre, h4").Nodes
-	comments := make(doc.Comment, 0, len(nodes))
+	sel = sel.Filter("p, pre, h4")
+	comments := make(doc.Comment, 0, len(sel.Nodes))
 
-	for _, node := range nodes {
-		text := node.FirstChild.Data
+	sel.Each(func(i int, s *goquery.Selection) {
+		node := sel.Get(i)
 		switch node.Data {
 		case "p":
-			var text string
-
-			for child := node.FirstChild; child != nil; child = child.NextSibling {
-				switch child.Type {
-				case html.TextNode:
-					text += child.Data
-				case html.ElementNode:
-					text += child.FirstChild.Data
-				}
-			}
-
-			f := strings.Fields(text)
+			f := strings.Fields(s.Text())
 			comments = append(comments, doc.Paragraph(strings.Join(f, " ")))
 		case "pre":
-			comments = append(comments, doc.Pre(text))
+			comments = append(comments, doc.Pre(s.Text()))
 		case "h4":
 			var ok bool
 			for _, attr := range node.Attr {
 				if attr.Key == "id" && strings.HasPrefix(attr.Val, "hdr-") {
 					ok = true
+					break
 				}
 			}
 			if !ok {
-				continue
+				return
 			}
-			text = strings.TrimSpace(text)
+			text := strings.TrimSpace(s.Text())
 			comments = append(comments, doc.Heading(text))
 		}
-	}
+	})
 	return comments
 }
 
