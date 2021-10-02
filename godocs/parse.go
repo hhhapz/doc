@@ -158,7 +158,8 @@ func subpackages(doc *goquery.Document) []string {
 	var pkgs []string
 	table := sel.Next()
 	table.Find("tbody a").Each(func(i int, s *goquery.Selection) {
-		pkgs = append(pkgs, s.Text())
+		link := s.AttrOr("href", "")
+		pkgs = append(pkgs, strings.TrimPrefix(link, "/"))
 	})
 
 	return pkgs
