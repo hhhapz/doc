@@ -13,6 +13,8 @@ type Package struct {
 
 	Functions map[string]Function `json:"functions"`
 	Types     map[string]Type     `json:"types"`
+
+	Subpackages []string `json:"subpackages"`
 }
 
 type Type struct {

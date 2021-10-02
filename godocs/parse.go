@@ -37,15 +37,18 @@ func newState(document *goquery.Document, useCase bool) (*state, error) {
 	}
 	url = url[8 : len(url)-1]
 
+	subpkgs := subpackages(document)
+
 	return &state{
 		doc: document,
 		pkg: doc.Package{
-			URL:       url,
-			Name:      name,
-			Overview:  overview[1:],
-			Examples:  examples,
-			Functions: map[string]doc.Function{},
-			Types:     map[string]doc.Type{},
+			URL:         url,
+			Name:        name,
+			Overview:    overview[1:],
+			Examples:    examples,
+			Functions:   map[string]doc.Function{},
+			Types:       map[string]doc.Type{},
+			Subpackages: subpkgs,
 		},
 		useCase: useCase,
 	}, nil
@@ -142,6 +145,23 @@ func (s *state) method(sel *goquery.Selection) error {
 
 	s.current.Methods[name] = m
 	return nil
+}
+
+const directoriesSelector = "h3#pkg-subdirectories"
+
+func subpackages(doc *goquery.Document) []string {
+	var sel *goquery.Selection
+	if sel = doc.Find(directoriesSelector); len(sel.Nodes) == 0 {
+		return nil
+	}
+
+	var pkgs []string
+	table := sel.Next()
+	table.Find("tbody a").Each(func(i int, s *goquery.Selection) {
+		pkgs = append(pkgs, s.Text())
+	})
+
+	return pkgs
 }
 
 func comments(sel *goquery.Selection) doc.Comment {
