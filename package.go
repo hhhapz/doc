@@ -11,10 +11,25 @@ type Package struct {
 	Overview Comment   `json:"overview"`
 	Examples []Example `json:"examples"`
 
+	Constants map[string]Variable `json:"constants"`
+	Variables map[string]Variable `json:"variables"`
 	Functions map[string]Function `json:"functions"`
 	Types     map[string]Type     `json:"types"`
 
 	Subpackages []string `json:"subpackages"`
+}
+
+type Variable struct {
+	Name      string  `json:"name"`
+	Signature string  `json:"signature"`
+	Comment   Comment `json:"comment"`
+}
+
+type Function struct {
+	Name      string    `json:"name"`
+	Signature string    `json:"signature"`
+	Comment   Comment   `json:"comment"`
+	Examples  []Example `json:"examples"`
 }
 
 type Type struct {
@@ -26,13 +41,6 @@ type Type struct {
 
 	TypeFunctions map[string]Function `json:"type_functions"`
 	Methods       map[string]Method   `json:"methods"`
-}
-
-type Function struct {
-	Name      string    `json:"name"`
-	Signature string    `json:"signature"`
-	Comment   Comment   `json:"comment"`
-	Examples  []Example `json:"examples"`
 }
 
 type Method struct {
@@ -100,7 +108,7 @@ func (h Heading) HTML() string {
 }
 
 func (h Heading) Markdown() string {
-	return string("**" + h + "**")
+	return string("## " + h)
 }
 
 type Paragraph string
@@ -129,7 +137,7 @@ func (pre Pre) HTML() string {
 }
 
 func (pre Pre) Markdown() string {
-	return "```\n" + string(pre) + "\n```"
+	return "```go\n" + string(pre) + "\n```"
 }
 
 type Example struct {

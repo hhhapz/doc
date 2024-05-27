@@ -6,10 +6,10 @@ import (
 	"time"
 )
 
-type CachedSearcher struct {
-	searcher Searcher
+type cachedSearcher struct {
+	Searcher
 
-	mu    sync.Mutex
+	mu    sync.RWMutex
 	cache map[string]*CachedPackage
 }
 
@@ -19,21 +19,24 @@ type CachedPackage struct {
 	Updated time.Time
 }
 
-func (cs *CachedSearcher) Search(ctx context.Context, module string) (Package, error) {
-	cs.mu.Lock()
-	defer cs.mu.Unlock()
-
-	if pkg, ok := cs.cache[module]; ok {
-		pkg.Updated = time.Now()
-		return pkg.Package, nil
+func (c *cachedSearcher) Search(ctx context.Context, module string) (Package, error) {
+	c.mu.RLock()
+	cPkg, ok := c.cache[module]
+	c.mu.RUnlock()
+	if ok {
+		cPkg.Updated = time.Now()
+		return cPkg.Package, nil
 	}
 
-	pkg, err := cs.searcher.Search(ctx, module)
+	pkg, err := c.Searcher.Search(ctx, module)
 	if err != nil {
 		return Package{}, err
 	}
 
-	cs.cache[module] = &CachedPackage{
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.cache[module] = &CachedPackage{
 		Package: pkg,
 		Created: time.Now(),
 		Updated: time.Now(),
@@ -41,8 +44,8 @@ func (cs *CachedSearcher) Search(ctx context.Context, module string) (Package, e
 	return pkg, nil
 }
 
-func (cs *CachedSearcher) WithCache(f func(cache map[string]*CachedPackage)) {
-	cs.mu.Lock()
-	f(cs.cache)
-	cs.mu.Unlock()
+func (c *cachedSearcher) WithCache(f func(cache map[string]*CachedPackage)) {
+	c.mu.Lock()
+	f(c.cache)
+	c.mu.Unlock()
 }

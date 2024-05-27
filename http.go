@@ -24,14 +24,14 @@ func (err InvalidStatusError) Error() string {
 	return fmt.Sprintf("invalid response status: %d", err)
 }
 
-// HTTPSearcher provides an interface to search the godocs package module page.
+// httpSearcher provides an interface to search the godocs package module page.
 // It implements the Searcher interface. A parser must be provided, such as
 // pkgsite.Parser, or godoc.Parser.
 //
-// HTTPSearcher does not cache results and will do the request every time, even
+// httpSearcher does not cache results and will do the request every time, even
 // if provided the same module name. If caching is required, the CachedSearcher
 // type.
-type HTTPSearcher struct {
+type httpSearcher struct {
 	parser Parser
 	client *http.Client
 
@@ -40,7 +40,7 @@ type HTTPSearcher struct {
 }
 
 // httpSearcher implements the Searcher interface.
-var _ Searcher = HTTPSearcher{}
+var _ Searcher = httpSearcher{}
 
 // Search searches godocs for the provided module.
 //
@@ -52,7 +52,7 @@ var _ Searcher = HTTPSearcher{}
 // returned. If the page could not be parsed by GoQuery, the error will be of
 // type Otherwise, issues while parsing the document will of type ParseError,
 // and will contain the selector being parsed, for more context.
-func (h HTTPSearcher) Search(ctx context.Context, module string) (Package, error) {
+func (h httpSearcher) Search(ctx context.Context, module string) (Package, error) {
 	body, err := h.request(ctx, module)
 	if err != nil {
 		return Package{}, err
@@ -66,16 +66,16 @@ func (h HTTPSearcher) Search(ctx context.Context, module string) (Package, error
 	return h.parser.Parse(document, h.withCase)
 }
 
-func (h *HTTPSearcher) withAgent(agent string) {
+func (h *httpSearcher) withAgent(agent string) {
 	h.agent = agent
 }
 
-func (h *HTTPSearcher) maintainCase() {
+func (h *httpSearcher) maintainCase() {
 	h.withCase = true
 }
 
 // request is a helper function to do the http request and return the body.
-func (h HTTPSearcher) request(ctx context.Context, module string) (io.ReadCloser, error) {
+func (h httpSearcher) request(ctx context.Context, module string) (io.ReadCloser, error) {
 	url := h.parser.URL(module)
 	r, err := http.NewRequestWithContext(ctx, "GET", url, http.NoBody)
 	if err != nil {
