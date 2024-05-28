@@ -246,7 +246,7 @@ func (a *app) topView() string {
 
 func (a *app) bottomView() string {
 	if !a.inp.Focused() {
-		return helpStyle("  /: search • ↑/↓: Navigate • q: Quit")
+		return helpStyle("  /: search • ←/↓/↑/→: Navigate  • q: Quit")
 	}
 	return a.inp.View()
 }
