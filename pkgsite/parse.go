@@ -40,8 +40,8 @@ func newState(document *goquery.Document, useCase bool) (*state, error) {
 			Name:        name,
 			Overview:    overview,
 			Examples:    examples,
-			Constants:   map[string]doc.Variable{},
-			Variables:   map[string]doc.Variable{},
+			ConstantMap: map[string]doc.Variable{},
+			VariableMap: map[string]doc.Variable{},
 			Functions:   map[string]doc.Function{},
 			Types:       map[string]doc.Type{},
 			Subpackages: subpkgs,
@@ -54,14 +54,24 @@ func (s *state) newError(sel *goquery.Selection, msg string) error {
 	return ParseError{sel, msg}
 }
 
-func (s *state) variables(sel *goquery.Selection, m map[string]doc.Variable) error {
+func (s *state) variables(sel *goquery.Selection, constants bool, m map[string]doc.Variable) error {
 	sel.Filter(".Documentation-declaration").Each(func(i int, sel *goquery.Selection) {
 		comment := comments(sel.NextUntil(".Documentation-declaration"))
+		signature := sel.Find("pre").Text()
+		v := doc.Variable{
+			Signature: signature,
+			Comment:   comment,
+		}
+		if constants {
+			s.pkg.Constants = append(s.pkg.Constants, v)
+		} else {
+			s.pkg.Variables = append(s.pkg.Variables, v)
+		}
 		sel.Find("span[data-kind]").Each(func(i int, nameSel *goquery.Selection) {
 			name := nameSel.AttrOr("id", "")
 			v := doc.Variable{
 				Name:      name,
-				Signature: sel.Find("pre").Text(),
+				Signature: signature,
 				Comment:   comment,
 			}
 			put(m, name, v, s.useCase)
@@ -116,7 +126,7 @@ func (s *state) typefuncs(sel *goquery.Selection, m map[string]doc.Function) err
 		Signature: strings.TrimSpace(decl.Text()),
 		Comment:   comment,
 	}
-	put(s.pkg.Functions, name, f, s.useCase)
+	// put(s.pkg.Functions, name, f, s.useCase)
 	put(m, name, f, s.useCase)
 	return nil
 }

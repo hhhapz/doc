@@ -35,10 +35,10 @@ func (p pkgsiteParser) Parse(document *goquery.Document, useCase bool) (doc.Pack
 	}
 
 	consts := document.Find("section.Documentation-constants")
-	s.variables(consts.Children(), s.pkg.Constants)
+	s.variables(consts.Children(), true, s.pkg.ConstantMap)
 
 	vars := document.Find("section.Documentation-variables")
-	s.variables(vars.Children(), s.pkg.Variables)
+	s.variables(vars.Children(), false, s.pkg.VariableMap)
 
 	funcs := document.Find(".Documentation-function")
 	s.functions(funcs)

@@ -11,8 +11,12 @@ type Package struct {
 	Overview Comment   `json:"overview"`
 	Examples []Example `json:"examples"`
 
-	Constants map[string]Variable `json:"constants"`
-	Variables map[string]Variable `json:"variables"`
+	Constants []Variable `json:"constants"`
+	Variables []Variable `json:"variables"`
+
+	ConstantMap map[string]Variable `json:"constant_map"`
+	VariableMap map[string]Variable `json:"variable_map"`
+
 	Functions map[string]Function `json:"functions"`
 	Types     map[string]Type     `json:"types"`
 
@@ -137,7 +141,7 @@ func (pre Pre) HTML() string {
 }
 
 func (pre Pre) Markdown() string {
-	return "```go\n" + string(pre) + "\n```"
+	return "```go\n" + string(pre) + "```"
 }
 
 type Example struct {
