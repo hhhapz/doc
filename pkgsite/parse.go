@@ -115,7 +115,7 @@ func (s *state) typ(sel *goquery.Selection) (doc.Type, error) {
 	return t, nil
 }
 
-func (s *state) typefuncs(sel *goquery.Selection, m map[string]doc.Function) error {
+func (s *state) typefuncs(sel *goquery.Selection, m map[string]doc.Function, dupe bool) error {
 	const header = "h4.Documentation-typeFuncHeader a"
 
 	name := sel.Find(header).First().Text()
@@ -126,7 +126,9 @@ func (s *state) typefuncs(sel *goquery.Selection, m map[string]doc.Function) err
 		Signature: strings.TrimSpace(decl.Text()),
 		Comment:   comment,
 	}
-	// put(s.pkg.Functions, name, f, s.useCase)
+	if dupe {
+		put(s.pkg.Functions, name, f, s.useCase)
+	}
 	put(m, name, f, s.useCase)
 	return nil
 }

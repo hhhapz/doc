@@ -12,7 +12,7 @@ import (
 // Parser is the interface that package site parsers implement.
 type Parser interface {
 	URL(module string) (full string)
-	Parse(document *goquery.Document, useCase bool) (Package, error)
+	Parse(document *goquery.Document, useCase, dupeTypeFuncs bool) (Package, error)
 }
 
 // InvalidStatusError indicates that the request to the godocs.io was not
@@ -35,8 +35,9 @@ type httpSearcher struct {
 	parser Parser
 	client *http.Client
 
-	agent    string
-	withCase bool
+	agent              string
+	withCase           bool
+	duplicateTypeFuncs bool
 }
 
 // httpSearcher implements the Searcher interface.

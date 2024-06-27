@@ -23,7 +23,7 @@ func (pkgsiteParser) URL(module string) string {
 	return base + module
 }
 
-func (p pkgsiteParser) Parse(document *goquery.Document, useCase bool) (doc.Package, error) {
+func (p pkgsiteParser) Parse(document *goquery.Document, useCase, dupeTypeFuncs bool) (doc.Package, error) {
 	// special case not found case for godocs
 	if document.Find("h3.Error-message").Text() == "404 Not Found" {
 		return doc.Package{}, doc.InvalidStatusError(404)
@@ -47,7 +47,7 @@ func (p pkgsiteParser) Parse(document *goquery.Document, useCase bool) (doc.Pack
 	types.Each(func(i int, sel *goquery.Selection) {
 		t, _ := s.typ(sel)
 		sel.Find(".Documentation-typeFunc").Each(func(i int, sel *goquery.Selection) {
-			s.typefuncs(sel, t.TypeFunctions)
+			s.typefuncs(sel, t.TypeFunctions, dupeTypeFuncs)
 		})
 		sel.Find(".Documentation-typeMethod").Each(func(i int, sel *goquery.Selection) {
 			s.methods(sel, t.Name, t.Methods)

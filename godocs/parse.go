@@ -23,7 +23,7 @@ type state struct {
 	useCase bool
 }
 
-func newState(document *goquery.Document, useCase bool) (*state, error) {
+func newState(document *goquery.Document, useCase, _ bool) (*state, error) {
 	name := document.Find("#pkg-overview").Text()
 	name = strings.TrimPrefix(name, "package ")
 

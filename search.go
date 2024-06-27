@@ -58,3 +58,9 @@ func MaintainCase() SearchOption {
 		s.withCase = true
 	}
 }
+
+func WithDuplicateTypeFuncs() SearchOption {
+	return func(s *httpSearcher) {
+		s.duplicateTypeFuncs = true
+	}
+}

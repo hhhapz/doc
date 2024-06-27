@@ -16,7 +16,7 @@ func TestPkgSite(t *testing.T) {
 	// testPackage(t, ctx, s, "database/sql")
 	// testPackage(t, ctx, s, "github.com/diamondburned/arikawa/v3")
 	// testPackage(t, ctx, s, "github.com/hhhapz/diffgen")
-	testPackage(t, ctx, s, "net")
+	testPackage(t, ctx, s, "context")
 }
 
 func testPackage(t *testing.T, ctx context.Context, s doc.Searcher, pkgName string) {
