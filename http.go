@@ -64,7 +64,7 @@ func (h httpSearcher) Search(ctx context.Context, module string) (Package, error
 	if err != nil {
 		return Package{}, err
 	}
-	return h.parser.Parse(document, h.withCase)
+	return h.parser.Parse(document, h.withCase, h.duplicateTypeFuncs)
 }
 
 func (h *httpSearcher) withAgent(agent string) {
